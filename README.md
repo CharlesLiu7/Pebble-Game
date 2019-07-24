@@ -4,4 +4,7 @@ This repo is a naive code implement of paper ["An Algorithm for Two-Dimensional 
 
 The code is implemented strictly according to the algorithm provided in the paper. It is recommended to use [`pebbleGameClass.py`](./pebbleGameClass.py), the initial input is edges of a graph. If you need to input the adjacency table of a graph, you can refer to [`pebbleGame.py`](./pebbleGame.py).
 
+TODO:
+- [ ] Undo the `rearrange pebbles` process but not copy the whole graph
+
 MIT License
