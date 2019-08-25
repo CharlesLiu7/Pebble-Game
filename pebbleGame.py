@@ -1,7 +1,6 @@
-# -*- coding: UTF-8 -*-
-__author__ = 'Charles'
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
+__author__ = 'Charles'
 
 import json
 import logging
@@ -34,13 +33,13 @@ def findPebble(v, _v, seen, path, pebble):
     if pebble[v][1] is None:
         return True
     x = pebble[v][0]
-    if (not seen[x] and x != _v):  # cannot allocate pebble from `_v`
+    if not seen[x] and x != _v:  # cannot allocate pebble from `_v`
         path[v] = x
         found = findPebble(x, _v, seen, path, pebble)
         if found:
             return True
     y = pebble[v][1]
-    if (not seen[y] and y != _v):
+    if not seen[y] and y != _v:
         path[v] = y
         found = findPebble(y, _v, seen, path, pebble)
         if found:
@@ -68,7 +67,7 @@ def rearrangePebble(v, _v, path, pebble):
         return
     v_copy = v  # the copy of the first site/node
     # 1. rearrange pebble allocation according to the path.
-    while (path[v] != -1):
+    while path[v] != -1:
         w = path[v]
         if path[w] == -1:
             if pebble[w][0] is None:
@@ -125,13 +124,18 @@ def pebbleGame(G):
             pebble_cpy = json.loads(json.dumps(pebble))  # try G_4e allocation
             flag = True  # whether a bond/edge is independent
             seen = [False for _ in G]
+            seen_or = [False for _ in G]
             for times in range(4):
                 path = [-1 for _ in G]
-                if (findPebble(i, v, seen, path, pebble_cpy)):
+                if findPebble(i, v, seen, path, pebble_cpy):
                     rearrangePebble(i, v, path, pebble_cpy)
+                    seen_or = [_i or _j for _i, _j in zip(seen, seen_or)]
+                    seen = [False for _ in G]
                     path = [-1 for _ in G]
-                elif (findPebble(v, i, seen, path, pebble_cpy)):
+                elif findPebble(v, i, seen, path, pebble_cpy):
                     rearrangePebble(v, i, path, pebble_cpy)
+                    seen_or = [_i or _j for _i, _j in zip(seen, seen_or)]
+                    seen = [False for _ in G]
                     path = [-1 for _ in G]
                 else:
                     flag = False
@@ -141,28 +145,28 @@ def pebbleGame(G):
                     elif times == 3:
                         # if current edge is redundant, then sites/nodes in `seen` are in a rigid set already
                         redundant.append((i, v))
-                        for x, y in enumerate(seen):
+                        for x, y in enumerate(seen_or):
                             if y:
                                 rigid_node[x] = True
             if flag:
                 # if G_4e is possible, and e=2v-3，then the current sub-graph is rigid
-                if sum(seen) != 2:  # not 2
+                if sum(seen_or) != 2:  # not 2
                     num_edge = 0
-                    for seen_index, seen_i in enumerate(seen):
+                    for seen_index, seen_i in enumerate(seen_or):
                         if seen_i:
                             for p_i in pebble_cpy[seen_index]:
-                                if p_i is not None:
+                                if p_i is not None and seen_or[p_i]:
                                     num_edge += 1
-                    if num_edge == 2 * sum(seen):
-                        for x, y in enumerate(seen):
+                    if num_edge == 2 * sum(seen_or):
+                        for x, y in enumerate(seen_or):
                             if y:
                                 rigid_node[x] = True
                 # now the current bond/edge is independent, allocate one pebble for it
                 seen = [False for _ in G]
                 path = [-1 for _ in G]
-                if (findPebble(i, v, seen, path, pebble)):
+                if findPebble(i, v, seen, path, pebble):
                     rearrangePebble(i, v, path, pebble)
-                elif (findPebble(v, i, seen, path, pebble)):
+                elif findPebble(v, i, seen, path, pebble):
                     rearrangePebble(v, i, path, pebble)
                 else:
                     logger.error(
@@ -174,12 +178,12 @@ if __name__ == '__main__':
     """
     0 -> 1, 2, 3
     1 -> 2, 5
-    2 -> 5
+    2 -> 3
     3 -> 4, 6
     4 -> 5, 6
     5 -> 6
     6 -> 7
     7 ->
     """
-    G = [{1, 2, 3}, {2, 5}, {5}, {4, 6}, {5, 6}, {6}, {7}, {}]
+    G = [{1, 2, 3}, {2, 5}, {3}, {4, 6}, {5, 6}, {6}, {7}, {}]
     print(pebbleGame(G))
