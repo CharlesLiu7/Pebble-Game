@@ -6,5 +6,6 @@ The code is implemented strictly according to the algorithm provided in the pape
 
 TODO:
 - [ ] Undo the `rearrange pebbles` process but not copy the whole graph
+- [ ] If an indenpendant edge added thus forms a rigid subgraph, the algorithm has a probability that the new rigid subgraph cannot be detected.
 
 MIT License
